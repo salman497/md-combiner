@@ -7,7 +7,7 @@
       "create-md-structure": "ts-node src/createStructure.ts",
       "use-structure": "ts-node src/useStructure.ts",
       "----------Project----------": "",
-      "create-md-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/github/promptfoo/site/docs",
+      "create-md-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/github/promptfoo/site/docs"
 
     },
     "dependencies": {

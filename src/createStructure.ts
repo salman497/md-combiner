@@ -2,11 +2,9 @@ import { glob } from 'glob';
 import * as path from 'path';
 import * as fs from 'fs';
 import { DirectoryStructure } from './types';
-
-const IGNORED_PATHS = ['Users', 'salmanaziz', 'github'];
+import { getProjectName, ensureResultFolder } from './utils';
 
 async function createDirectoryStructure(rootPath: string): Promise<void> {
-  // Explicitly type the initial structure
   const structure: DirectoryStructure = {
     separator: '------------------- {fileName} -------------------',
     generateTableOfContent: true,
@@ -45,7 +43,11 @@ async function createDirectoryStructure(rootPath: string): Promise<void> {
     });
   });
 
-  const outputFileName = path.basename(rootPath) + '.json';
+  // Create result folder and save file with project name
+  const resultFolder = ensureResultFolder();
+  const projectName = getProjectName(rootPath);
+  const outputFileName = path.join(resultFolder, `${projectName}.json`);
+  
   fs.writeFileSync(outputFileName, JSON.stringify(structure, null, 2));
   console.log(`Structure saved to ${outputFileName}`);
 }

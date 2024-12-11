@@ -2,6 +2,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import markdownToc from 'markdown-toc';
 import { DirectoryStructure } from './types';
+import { ensureResultFolder } from './utils';
 
 function generateTableOfContents(structure: DirectoryStructure, prefix = ''): string {
   let content = '';
@@ -77,21 +78,25 @@ function combineFiles(structure: DirectoryStructure): string {
 }
 
 async function processStructureFile(structureFilePath: string): Promise<void> {
-  const structure: DirectoryStructure = JSON.parse(
-    fs.readFileSync(structureFilePath, 'utf-8')
-  );
-
-  const content = combineFiles(structure);
-  const outputFileName = path.basename(structureFilePath, '.json') + '_combined.md';
+    const structure: DirectoryStructure = JSON.parse(
+      fs.readFileSync(structureFilePath, 'utf-8')
+    );
   
-  fs.writeFileSync(outputFileName, content);
-  console.log(`Combined markdown saved to ${outputFileName}`);
-}
-
-const structureFilePath = process.argv[2];
-if (!structureFilePath) {
-  console.error('Please provide a structure JSON file path');
-  process.exit(1);
-}
-
-processStructureFile(structureFilePath);
+    const content = combineFiles(structure);
+    const resultFolder = ensureResultFolder();
+    const outputFileName = path.join(
+      resultFolder, 
+      path.basename(structureFilePath, '.json') + '_combined.md'
+    );
+    
+    fs.writeFileSync(outputFileName, content);
+    console.log(`Combined markdown saved to ${outputFileName}`);
+  }
+  
+  const structureFilePath = process.argv[2];
+  if (!structureFilePath) {
+    console.error('Please provide a structure JSON file path');
+    process.exit(1);
+  }
+  
+  processStructureFile(structureFilePath);
