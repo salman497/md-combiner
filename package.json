@@ -1,0 +1,22 @@
+{
+    "name": "md-combiner",
+    "version": "1.0.0",
+    "description": "Combine markdown files recursively",
+    "scripts": {
+      "build": "tsc",
+      "create-md-structure": "ts-node src/createStructure.ts",
+      "use-structure": "ts-node src/useStructure.ts",
+      "----------Project----------": "",
+      "create-md-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/github/promptfoo/site/docs",
+
+    },
+    "dependencies": {
+      "glob": "^10.3.10",
+      "markdown-toc": "^1.2.0"
+    },
+    "devDependencies": {
+      "@types/node": "^20.11.0",
+      "ts-node": "^10.9.2",
+      "typescript": "^5.3.3"
+    }
+  }
