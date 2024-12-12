@@ -1,16 +1,15 @@
 import * as path from 'path';
 import * as fs from 'fs';
+import { IGNORED_FILES, IGNORED_SYSTEM_FOLDERS } from './constants';
 
 export function getProjectName(fullPath: string): string {
-  // Split the path and clean up the parts
   const parts = fullPath.split(path.sep)
-    .filter(Boolean) // Remove empty strings
-    .filter(part => !['Users', 'user', 'home', 'salmanaziz','Documents', 'github'].includes(part));
+    .filter(Boolean)
+    .filter(part => !IGNORED_SYSTEM_FOLDERS.includes(part));
   
-  // Join parts with underscore only if they don't already contain one
   const projectName = parts
-    .slice(0, 3) // Take up to 3 meaningful parts
-    .map(part => part.replace(/[_-]+/g, '_')) // Normalize any existing separators to single underscore
+    .slice(0, 3)
+    .map(part => part.replace(/[_-]+/g, '_'))
     .join('_');
 
   return projectName;
@@ -22,4 +21,18 @@ export function ensureResultFolder(): string {
     fs.mkdirSync(resultFolder, { recursive: true });
   }
   return resultFolder;
+}
+
+export function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
+export function shouldIncludeFile(filename: string): boolean {
+  const lowercaseFilename = filename.toLowerCase();
+  // Check if file ends with .md and is not in ignore list
+  return lowercaseFilename.endsWith('.md') && 
+         !IGNORED_FILES.some(ignoreFile => 
+           ignoreFile.toLowerCase() === lowercaseFilename
+         );
 }

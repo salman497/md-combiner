@@ -2,7 +2,7 @@ import { glob } from 'glob';
 import * as path from 'path';
 import * as fs from 'fs';
 import { DirectoryStructure } from './types';
-import { getProjectName, ensureResultFolder } from './utils';
+import { getProjectName, ensureResultFolder, shouldIncludeFile } from './utils';
 
 async function createDirectoryStructure(rootPath: string): Promise<void> {
   const structure: DirectoryStructure = {
@@ -14,9 +14,12 @@ async function createDirectoryStructure(rootPath: string): Promise<void> {
 
   const files = await glob('**/*.md', { cwd: rootPath });
   
-  files.sort((a, b) => a.localeCompare(b));
+  // Sort and filter files
+  const filteredFiles = files
+    .filter(file => shouldIncludeFile(path.basename(file)))
+    .sort((a, b) => a.localeCompare(b));
 
-  files.forEach(file => {
+  filteredFiles.forEach(file => {
     const fullPath = path.join(rootPath, file);
     const pathParts = file.split(path.sep);
     
@@ -50,6 +53,7 @@ async function createDirectoryStructure(rootPath: string): Promise<void> {
   
   fs.writeFileSync(outputFileName, JSON.stringify(structure, null, 2));
   console.log(`Structure saved to ${outputFileName}`);
+  console.log(`Total files processed: ${filteredFiles.length} (after filtering)`);
 }
 
 const rootPath = process.argv[2];
