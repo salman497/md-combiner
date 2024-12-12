@@ -4,21 +4,28 @@ import markdownToc from 'markdown-toc';
 import { DirectoryStructure } from './types';
 import { ensureResultFolder } from './utils';
 
+// Helper function to get error message
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  return String(error);
+}
+
 function generateTableOfContents(structure: DirectoryStructure, prefix = ''): string {
   let content = '';
 
-  // Add root files
   Object.entries(structure)
     .filter(([key, value]) => 
       key !== 'folders' && 
       !key.startsWith('_') && 
-      typeof value === 'string'
+      typeof value === 'string' &&
+      key !== 'separator' &&
+      key !== 'outputFormat' &&
+      value.endsWith('.md')
     )
     .forEach(([filename]) => {
       content += `- ${prefix}${filename}\n`;
     });
 
-  // Add folders and their files
   if (structure.folders) {
     Object.entries(structure.folders).forEach(([folderName, folderContent]) => {
       content += `- ${prefix}${folderName}/\n`;
@@ -44,12 +51,19 @@ function combineFiles(structure: DirectoryStructure): string {
     .filter(([key, value]) => 
       key !== 'folders' && 
       !key.startsWith('_') && 
-      typeof value === 'string'
+      typeof value === 'string' &&
+      key !== 'separator' &&
+      key !== 'outputFormat' &&
+      value.endsWith('.md')
     )
     .forEach(([filename, filepath]) => {
-      const fileContent = fs.readFileSync(filepath as string, 'utf-8');
-      content += separator.replace('{fileName}', filename) + '\n\n';
-      content += fileContent + '\n\n';
+      try {
+        const fileContent = fs.readFileSync(filepath as string, 'utf-8');
+        content += separator.replace('{fileName}', filename) + '\n\n';
+        content += fileContent + '\n\n';
+      } catch (error) {
+        console.warn(`Warning: Could not read file ${filepath}: ${getErrorMessage(error)}`);
+      }
     });
 
   function processFolder(folderStructure: DirectoryStructure) {
@@ -57,12 +71,17 @@ function combineFiles(structure: DirectoryStructure): string {
       .filter(([key, value]) => 
         key !== 'folders' && 
         !key.startsWith('_') && 
-        typeof value === 'string'
+        typeof value === 'string' &&
+        value.endsWith('.md')
       )
       .forEach(([filename, filepath]) => {
-        const fileContent = fs.readFileSync(filepath as string, 'utf-8');
-        content += separator.replace('{fileName}', filename) + '\n\n';
-        content += fileContent + '\n\n';
+        try {
+          const fileContent = fs.readFileSync(filepath as string, 'utf-8');
+          content += separator.replace('{fileName}', filename) + '\n\n';
+          content += fileContent + '\n\n';
+        } catch (error) {
+          console.warn(`Warning: Could not read file ${filepath}: ${getErrorMessage(error)}`);
+        }
       });
 
     if (folderStructure.folders) {
@@ -78,10 +97,11 @@ function combineFiles(structure: DirectoryStructure): string {
 }
 
 async function processStructureFile(structureFilePath: string): Promise<void> {
+  try {
     const structure: DirectoryStructure = JSON.parse(
       fs.readFileSync(structureFilePath, 'utf-8')
     );
-  
+
     const content = combineFiles(structure);
     const resultFolder = ensureResultFolder();
     const outputFileName = path.join(
@@ -91,12 +111,16 @@ async function processStructureFile(structureFilePath: string): Promise<void> {
     
     fs.writeFileSync(outputFileName, content);
     console.log(`Combined markdown saved to ${outputFileName}`);
-  }
-  
-  const structureFilePath = process.argv[2];
-  if (!structureFilePath) {
-    console.error('Please provide a structure JSON file path');
+  } catch (error) {
+    console.error(`Error processing structure file: ${getErrorMessage(error)}`);
     process.exit(1);
   }
-  
-  processStructureFile(structureFilePath);
+}
+
+const structureFilePath = process.argv[2];
+if (!structureFilePath) {
+  console.error('Please provide a structure JSON file path');
+  process.exit(1);
+}
+
+processStructureFile(structureFilePath);

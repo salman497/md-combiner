@@ -8,8 +8,7 @@
       "use-structure": "ts-node src/useStructure.ts",
       "----------Project----------": "",
       "create-md-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/github/promptfoo/site/docs",
-      "use-structure": "ts-node src/createStructure.ts /Users/salmanaziz/github/promptfoo/site/docs"
-
+      "use-structure-prompt-foo": "ts-node src/useStructure.ts ./result/promptfoo_site_docs.json"
     },
     "dependencies": {
       "glob": "^10.3.10",
