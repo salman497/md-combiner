@@ -2,13 +2,18 @@ import * as path from 'path';
 import * as fs from 'fs';
 
 export function getProjectName(fullPath: string): string {
-  const parts = fullPath.split(path.sep);
-  // Find the first meaningful parent folders after filtering out system folders
-  const systemFolders = ['Users', 'user', 'home', 'Documents', 'github', 'salmanaziz'];
-  const meaningfulParts = parts.filter(part => !systemFolders.includes(part));
+  // Split the path and clean up the parts
+  const parts = fullPath.split(path.sep)
+    .filter(Boolean) // Remove empty strings
+    .filter(part => !['Users', 'user', 'home', 'salmanaziz','Documents', 'github'].includes(part));
   
-  // Take up to 3 meaningful folder names
-  return meaningfulParts.slice(0, 3).join('_');
+  // Join parts with underscore only if they don't already contain one
+  const projectName = parts
+    .slice(0, 3) // Take up to 3 meaningful parts
+    .map(part => part.replace(/[_-]+/g, '_')) // Normalize any existing separators to single underscore
+    .join('_');
+
+  return projectName;
 }
 
 export function ensureResultFolder(): string {
