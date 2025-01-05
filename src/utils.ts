@@ -35,9 +35,7 @@ export function shouldIncludeFile(filename: string, allowedExtensions: string[])
   const isAllowedExtension = allowedExtensions.some(extension =>
     lowercaseFilename.endsWith(extension.toLowerCase())
   );
-
-  console.log(`is Found ${lowercaseFilename} === ${allowedExtensions.join(',')}`);
-
+  
   const isIgnored = IGNORED_FILES.some(ignoreFile =>
     ignoreFile.toLowerCase() === lowercaseFilename
   );
