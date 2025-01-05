@@ -63,14 +63,16 @@ function createChunks(content: string): string[] {
 }
 
 function addMetadata(filename: string, filepath: string, content: string): string {
+
+/*  created: ${stats.birthtime.toISOString()}
+modified: ${stats.mtime.toISOString()}
+size: ${stats.size} */
+
   const stats = fs.statSync(filepath);
   return `---
 source: ${filename}
 path: ${filepath}
 type: ${getFileLanguage(filename)}
-created: ${stats.birthtime.toISOString()}
-modified: ${stats.mtime.toISOString()}
-size: ${stats.size}
 ---
 ${content}`;
 }
