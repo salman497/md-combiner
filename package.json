@@ -8,7 +8,10 @@
       "use-structure": "ts-node src/useStructure.ts",
       "----------Project----------": "",
       "create-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/git-code/promptfoo/site/docs",
-      "use-structure-prompt-foo": "ts-node ./result/git_code_promptfoo_site.json"
+      "create-structure-prompt-foo-example": "ts-node src/createStructure.ts /Users/salmanaziz/git-code/promptfoo/examples -includeOtherExtensions",
+      "use-structure-prompt-foo": "ts-node src/useStructure.ts ./result/git_code_promptfoo_site.json",
+      "use-structure-prompt-foo-examples": "ts-node src/useStructure.ts ./result/git_code_promptfoo_examples.json"
+
 
     },
     "dependencies": {

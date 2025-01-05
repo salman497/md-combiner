@@ -2,25 +2,42 @@ import { glob } from 'glob';
 import * as path from 'path';
 import * as fs from 'fs';
 import { DirectoryStructure } from './types';
+import { INCLUDED_EXTENSIONS, LARGE_FILE_THRESHOLD, LARGE_FILES_KEY } from './constants';
 import { getProjectName, ensureResultFolder, shouldIncludeFile } from './utils';
 
-async function createDirectoryStructure(rootPath: string): Promise<void> {
+async function createDirectoryStructure(
+  rootPath: string, 
+  includeOtherExtensions: boolean
+): Promise<void> {
   const structure: DirectoryStructure = {
     separator: '------------------- {fileName} -------------------',
     generateTableOfContent: true,
     outputFormat: 'markdown',
-    folders: {}
+    folders: {},
+    [LARGE_FILES_KEY]: []
   };
 
-  const files = await glob('**/*.md', { cwd: rootPath });
+  const extensions = includeOtherExtensions 
+    ? INCLUDED_EXTENSIONS.join(',')
+    : '.md';
   
-  // Sort and filter files
+  const files = await glob(`**/*{${extensions}}`, { cwd: rootPath });
+
   const filteredFiles = files
-    .filter(file => shouldIncludeFile(path.basename(file)))
+    .filter(file => shouldIncludeFile(path.basename(file), includeOtherExtensions ? INCLUDED_EXTENSIONS : ['.md'] ))
     .sort((a, b) => a.localeCompare(b));
 
   filteredFiles.forEach(file => {
     const fullPath = path.join(rootPath, file);
+    const fileStats = fs.statSync(fullPath);
+
+    // Check for large files
+    if (fileStats.size > LARGE_FILE_THRESHOLD) {
+      structure[LARGE_FILES_KEY]?.push(file);
+      console.warn(`Large file detected: ${file} (${fileStats.size} bytes)`);
+      return;
+    }
+
     const pathParts = file.split(path.sep);
     
     if (pathParts.length === 1) {
@@ -46,7 +63,6 @@ async function createDirectoryStructure(rootPath: string): Promise<void> {
     });
   });
 
-  // Create result folder and save file with project name
   const resultFolder = ensureResultFolder();
   const projectName = getProjectName(rootPath);
   const outputFileName = path.join(resultFolder, `${projectName}.json`);
@@ -54,12 +70,17 @@ async function createDirectoryStructure(rootPath: string): Promise<void> {
   fs.writeFileSync(outputFileName, JSON.stringify(structure, null, 2));
   console.log(`Structure saved to ${outputFileName}`);
   console.log(`Total files processed: ${filteredFiles.length} (after filtering)`);
+  if (structure[LARGE_FILES_KEY] && structure[LARGE_FILES_KEY]?.length > 0) {
+    console.log(`Large files skipped: ${structure[LARGE_FILES_KEY].length}`);
+  }
 }
 
 const rootPath = process.argv[2];
+const includeOtherExtensions = process.argv.includes('-includeOtherExtensions');
+
 if (!rootPath) {
   console.error('Please provide a root directory path');
   process.exit(1);
 }
 
-createDirectoryStructure(rootPath);
+createDirectoryStructure(rootPath, includeOtherExtensions);

@@ -28,11 +28,17 @@ export function getErrorMessage(error: unknown): string {
   return String(error);
 }
 
-export function shouldIncludeFile(filename: string): boolean {
+export function shouldIncludeFile(filename: string, allowedExtensions: string[]): boolean {
+  
   const lowercaseFilename = filename.toLowerCase();
-  // Check if file ends with .md and is not in ignore list
-  return lowercaseFilename.endsWith('.md') && 
-         !IGNORED_FILES.some(ignoreFile => 
-           ignoreFile.toLowerCase() === lowercaseFilename
-         );
+
+  const isAllowedExtension = allowedExtensions.some(extension =>
+    lowercaseFilename.endsWith(extension.toLowerCase())
+  );
+
+  const isIgnored = IGNORED_FILES.some(ignoreFile =>
+    ignoreFile.toLowerCase() === lowercaseFilename
+  );
+
+  return isAllowedExtension && !isIgnored;
 }
