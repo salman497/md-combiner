@@ -6,7 +6,10 @@
       "build": "tsc",
       "create-md-structure": "ts-node src/createStructure.ts",
       "use-structure": "ts-node src/useStructure.ts",
-      "----------Project----------": ""
+      "----------Project----------": "",
+      "create-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/git-code/promptfoo/site/docs",
+      "use-structure-prompt-foo": "ts-node ./result/git_code_promptfoo_site.json"
+
     },
     "dependencies": {
       "glob": "^10.3.10",
