@@ -18,13 +18,13 @@ async function createDirectoryStructure(
   };
 
   const extensions = includeOtherExtensions 
-    ? INCLUDED_EXTENSIONS.join(',')
-    : '.md';
-  
-  const files = await glob(`**/*{${extensions}}`, { cwd: rootPath });
+    ? INCLUDED_EXTENSIONS
+    : ['.md'];
+    console.log(`Finding extensions ${extensions.join(',')} at ${rootPath}`);
+  const files = await glob(`**/*{${extensions.join(',')}}`, { cwd: rootPath });
 
   const filteredFiles = files
-    .filter(file => shouldIncludeFile(path.basename(file), includeOtherExtensions ? INCLUDED_EXTENSIONS : ['.md'] ))
+    .filter(file => shouldIncludeFile(path.basename(file), extensions))
     .sort((a, b) => a.localeCompare(b));
 
   filteredFiles.forEach(file => {

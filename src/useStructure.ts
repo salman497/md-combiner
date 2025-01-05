@@ -1,5 +1,7 @@
-// combineFiles.ts
 import * as fs from 'fs';
+import { createReadStream } from 'fs';
+import { promisify } from 'util';
+import * as readline from 'readline';
 import * as path from 'path';
 import markdownToc from 'markdown-toc';
 import { DirectoryStructure } from './types';
@@ -108,7 +110,6 @@ function generateTableOfContents(structure: DirectoryStructure, prefix = ''): st
         content += generateTableOfContents(folderContent, `  ${prefix}`);
       });
   }
-
   return content;
 }
 
@@ -120,14 +121,28 @@ function normalizeContent(content: string): string {
     .trim();
 }
 
-function processFile(
+async function processFile(
   filename: string, 
   filepath: string, 
   separator: string
-): string {
+): Promise<string> {
   try {
-    const fileContent = fs.readFileSync(filepath, 'utf-8');
-    const normalizedContent = normalizeContent(fileContent);
+    // Check if file exists
+    await promisify(fs.access)(filepath);
+    
+    let content = '';
+    const fileStream = createReadStream(filepath, { encoding: 'utf-8' });
+    const rl = readline.createInterface({
+      input: fileStream,
+      crlfDelay: Infinity
+    });
+
+    // Read file line by line
+    for await (const line of rl) {
+      content += line + '\n';
+    }
+
+    const normalizedContent = normalizeContent(content);
     const formattedContent = formatContent(filename, normalizedContent);
     const contentWithMetadata = addMetadata(filename, filepath, formattedContent);
     
@@ -138,14 +153,14 @@ function processFile(
   }
 }
 
-function combineFiles(structure: DirectoryStructure): string {
+async function combineFiles(structure: DirectoryStructure): Promise<string> {
   let content = '';
   const separator = structure.separator || '-------------------';
-
+  
   // Add header with processing timestamp
   content += `# Combined Documentation\n\n`;
   content += `Generated: ${new Date().toISOString()}\n\n`;
-
+  
   // Add table of contents
   if (structure.generateTableOfContent) {
     content += '# Table of Contents\n\n';
@@ -165,7 +180,7 @@ function combineFiles(structure: DirectoryStructure): string {
   }
 
   // Process root files
-  Object.entries(structure)
+  const rootFiles = Object.entries(structure)
     .filter(([key, value]) => 
       key !== 'folders' && 
       key !== LARGE_FILES_KEY &&
@@ -174,38 +189,41 @@ function combineFiles(structure: DirectoryStructure): string {
       key !== 'separator' &&
       key !== 'outputFormat'
     )
-    .sort(([a], [b]) => a.localeCompare(b))
-    .forEach(([filename, filepath]) => {
-      content += processFile(filename, filepath as string, separator);
-    });
+    .sort(([a], [b]) => a.localeCompare(b));
+
+  for (const [filename, filepath] of rootFiles) {
+    content += await processFile(filename, filepath as string, separator);
+  }
 
   // Recursive function to process folders
-  function processFolder(folderStructure: DirectoryStructure, currentPath: string = '') {
-    Object.entries(folderStructure)
+  async function processFolder(folderStructure: DirectoryStructure, currentPath: string = '') {
+    const files = Object.entries(folderStructure)
       .filter(([key, value]) => 
         key !== 'folders' && 
         !key.startsWith('_') && 
         typeof value === 'string'
       )
-      .sort(([a], [b]) => a.localeCompare(b))
-      .forEach(([filename, filepath]) => {
-        const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
-        content += processFile(fullPath, filepath as string, separator);
-      });
+      .sort(([a], [b]) => a.localeCompare(b));
+
+    for (const [filename, filepath] of files) {
+      const fullPath = currentPath ? `${currentPath}/${filename}` : filename;
+      content += await processFile(fullPath, filepath as string, separator);
+    }
 
     if (folderStructure.folders) {
-      Object.entries(folderStructure.folders)
-        .sort(([a], [b]) => a.localeCompare(b))
-        .forEach(([folderName, folderContent]) => {
-          const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
-          processFolder(folderContent, newPath);
-        });
+      const sortedFolders = Object.entries(folderStructure.folders)
+        .sort(([a], [b]) => a.localeCompare(b));
+      
+      for (const [folderName, folderContent] of sortedFolders) {
+        const newPath = currentPath ? `${currentPath}/${folderName}` : folderName;
+        await processFolder(folderContent, newPath);
+      }
     }
   }
 
   // Process all folders
   if (structure.folders) {
-    processFolder(structure);
+    await processFolder(structure);
   }
 
   return content;
@@ -217,11 +235,11 @@ async function processStructureFile(structureFilePath: string): Promise<void> {
     const structure: DirectoryStructure = JSON.parse(
       fs.readFileSync(structureFilePath, 'utf-8')
     );
-
+    
     // Generate combined content
     console.log('Generating combined content...');
-    const content = combineFiles(structure);
-
+    const content = await combineFiles(structure);
+    
     // Create output file
     const resultFolder = ensureResultFolder();
     const outputFileName = path.join(
@@ -232,19 +250,18 @@ async function processStructureFile(structureFilePath: string): Promise<void> {
     // Write the combined content
     fs.writeFileSync(outputFileName, content);
     console.log(`Combined markdown saved to ${outputFileName}`);
-
+    
     // Generate statistics
     const stats = {
       totalSize: Buffer.from(content).length,
       totalChunks: createChunks(content).length,
       averageChunkSize: Math.round(Buffer.from(content).length / createChunks(content).length)
     };
-
+    
     console.log('\nProcessing Statistics:');
     console.log(`Total content size: ${Math.round(stats.totalSize / 1024)}KB`);
     console.log(`Total chunks: ${stats.totalChunks}`);
     console.log(`Average chunk size: ${Math.round(stats.averageChunkSize / 1024)}KB`);
-
   } catch (error) {
     console.error(`Error processing structure file: ${getErrorMessage(error)}`);
     process.exit(1);
@@ -258,4 +275,7 @@ if (!structureFilePath) {
   process.exit(1);
 }
 
-processStructureFile(structureFilePath);
+processStructureFile(structureFilePath).catch(error => {
+  console.error(`Unhandled error: ${getErrorMessage(error)}`);
+  process.exit(1);
+});
