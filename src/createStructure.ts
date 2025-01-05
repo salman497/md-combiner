@@ -21,7 +21,8 @@ async function createDirectoryStructure(
     ? INCLUDED_EXTENSIONS
     : ['.md'];
     console.log(`Finding extensions ${extensions.join(',')} at ${rootPath}`);
-  const files = await glob(`**/*{${extensions.join(',')}}`, { cwd: rootPath });
+  const files = includeOtherExtensions ? await glob(`**/*{${extensions.join(',')}}`, { cwd: rootPath }) : await glob('**/*.md', { cwd: rootPath });
+
 
   const filteredFiles = files
     .filter(file => shouldIncludeFile(path.basename(file), extensions))
