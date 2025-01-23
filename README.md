@@ -21,7 +21,7 @@ npm run create-md-structure -- "<Your Folder Path>"
 ```
 
 This will generate a JSON file in the `./result` folder with the structure below:
-```json
+```
 {
   "separator": "------------------- {fileName} -------------------",
   "generateTableOfContent": true,
