@@ -6,7 +6,7 @@ Combine repository docs into a single markdown file, so that you can perform RAG
 - Auto-generates Table of Contents (optional).
 - Supports multiple file extensions (e.g., `.md`, `.txt`, `.json`, etc.).
 
----
+
 
 ## 📖 Usage
 
@@ -41,7 +41,7 @@ npm run create-md-structure -- "<Your Folder Path>" -includeOtherExtensions
 ```
 Supported extensions: `.md`, `.txt`, `.yaml`, `.yml`, `.json`, `.ts`, `.js`, `.ipynb`.
 
----
+
 
 ### ➡️ Step 3: Generate Combined Markdown
 Once you have the JSON Structure and reviewed, then combine all files into one markdown:
@@ -49,4 +49,4 @@ Once you have the JSON Structure and reviewed, then combine all files into one m
 npm run generate-md -- "./result/<your-structure-file>.json"
 ```
 
----
+
