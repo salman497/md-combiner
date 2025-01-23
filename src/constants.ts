@@ -1,4 +1,4 @@
-export const INCLUDED_EXTENSIONS = ['.md', '.txt', '.yaml', '.yml', '.json', '.ts', '.js'];
+export const INCLUDED_EXTENSIONS = ['.md', '.txt', '.yaml', '.yml', '.json', '.ts', '.js', '.ipynb'];
 export const LARGE_FILE_THRESHOLD = 102400; // 100 KB in bytes
 export const LARGE_FILES_KEY = 'largeTextContentFiles';
 export const CHUNK_SIZE = 1000;

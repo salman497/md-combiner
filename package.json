@@ -5,13 +5,7 @@
     "scripts": {
       "build": "tsc",
       "create-md-structure": "ts-node src/createStructure.ts",
-      "use-structure": "ts-node src/useStructure.ts",
-      "----------Project----------": "",
-      "create-structure-prompt-foo": "ts-node src/createStructure.ts /Users/salmanaziz/git-code/promptfoo/site/docs",
-      "create-structure-prompt-foo-example": "ts-node src/createStructure.ts /Users/salmanaziz/git-code/promptfoo/examples -includeOtherExtensions",
-      "use-structure-prompt-foo": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts ./result/git_code_promptfoo_site.json",
-      "use-structure-prompt-foo-examples": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts ./result/git_code_promptfoo_examples.json",
-      "use-custom": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts ./result/custom_promptfoo.json"
+      "generate-md": "node --max-old-space-size=8192 -r ts-node src/useStructure.ts"
     },
     "dependencies": {
       "glob": "^10.3.10",
