@@ -35,7 +35,8 @@ function getFileLanguage(filename: string): string {
     '.scss': 'scss',
     '.sql': 'sql',
     '.sh': 'bash',
-    '.py': 'python'
+    '.py': 'python',
+    '.ipynb': 'jupyter-notebook'
   };
   return languageMap[ext] || 'text';
 }
