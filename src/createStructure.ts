@@ -7,7 +7,7 @@ import { getProjectName, ensureResultFolder, shouldIncludeFile } from './utils';
 
 async function createDirectoryStructure(
   rootPath: string, 
-  includeOtherExtensions: boolean
+  excludeOtherExtensions: boolean
 ): Promise<void> {
   const structure: DirectoryStructure = {
     separator: '------------------- {fileName} -------------------',
@@ -16,7 +16,7 @@ async function createDirectoryStructure(
     folders: {},
     [LARGE_FILES_KEY]: []
   };
-
+  const includeOtherExtensions =  excludeOtherExtensions === true ? false : true;
   const extensions = includeOtherExtensions 
     ? INCLUDED_EXTENSIONS
     : ['.md'];

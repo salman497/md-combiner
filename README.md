@@ -29,16 +29,7 @@ This will generate a JSON file in the `./result` folder with the structure below
   "largeTextContentFiles": [] // Large files, so that you cleanup manually.
 }
 ```
-
-You can customize the JSON file as needed.
-
-##### **To Include Data from Other File Extensions:**
-Add `-includeOtherExtensions` to the command:
-```bash
-npm run create-md-structure -- "<Your Folder Path>" -includeOtherExtensions
-```
-Supported extensions: `.md`, `.txt`, `.yaml`, `.yml`, `.json`, `.ts`, `.js`, `.ipynb`.
-
+Supported extensions that will be combine into markdown: `.md`, `.txt`, `.yaml`, `.yml`, `.json`, `.ts`, `.js`, `.ipynb`, to exclude other extension add `-excludeOtherExtensions` to the command or update constant.ts:
 
 
 ### Step 3: Generate Combined Markdown
