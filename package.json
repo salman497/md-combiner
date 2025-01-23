@@ -5,7 +5,7 @@
     "scripts": {
       "build": "tsc",
       "create-md-structure": "ts-node src/createStructure.ts",
-      "generate-md": "node --max-old-space-size=8192 -r ts-node src/useStructure.ts"
+      "generate-md": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts"
     },
     "dependencies": {
       "glob": "^10.3.10",
