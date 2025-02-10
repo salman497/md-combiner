@@ -5,7 +5,10 @@
     "scripts": {
       "build": "tsc",
       "create-md-structure": "ts-node src/createStructure.ts",
-      "generate-md": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts"
+      "generate-md": "node --max-old-space-size=8192 -r ts-node/register src/useStructure.ts",
+      "step1-create-json": "npm run create-md-structure '/Users/<your-name>/<rest-of-folder-path>'",
+      "--------------------step2: Review json file like largeTextContentFiles prop----------------------------" : "",
+      "step3-create-md-from-json": "npm run generate-md 'result/<step1-generated-json-file-name>.json'"
     },
     "dependencies": {
       "glob": "^10.3.10",

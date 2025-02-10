@@ -29,6 +29,7 @@ function getFileLanguage(filename: string): string {
     '.js': 'javascript',
     '.txt': 'text',
     '.md': 'markdown',
+    '.mdx': 'markdown for jsx',
     '.jsx': 'jsx',
     '.tsx': 'tsx',
     '.css': 'css',
@@ -151,7 +152,9 @@ async function processFile(
     
     return `${separator.replace('{fileName}', filename)}\n\n${contentWithMetadata}\n\n`;
   } catch (error) {
-    console.warn(`Warning: Could not read file ${filepath}: ${getErrorMessage(error)}`);
+    if(!filepath.includes('fileName') && !filepath.includes('markdown')) {
+      console.warn(`Warning: Could not read file ${filepath}: ${getErrorMessage(error)}`);
+    }
     return '';
   }
 }
